@@ -2,7 +2,7 @@
 
 from flask import Flask, jsonify, request
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from . import create_app, db, bcrypt
+from __init__ import create_app, db, bcrypt  
 from models import User, Event, Reservation
 
 app = create_app()
@@ -77,12 +77,18 @@ def update_profile():
 def create_event():
     current_user = get_jwt_identity()
     data = request.get_json()
+    user = User.query.filter_by(email=current_user['email']).first()  # Ensure user exists
+
+    if not user:
+        return jsonify({"errors": ["User not found"]}), 404
+
     new_event = Event(
         title=data['title'],
         description=data['description'],
         date=data['date'],
-        user_id=User.query.filter_by(email=current_user['email']).first().id
+        user_id=user.id
     )
+
     try:
         db.session.add(new_event)
         db.session.commit()
@@ -91,7 +97,7 @@ def create_event():
         db.session.rollback()
         app.logger.error(f"Error creating event: {str(e)}")
         return jsonify({"errors": ["Internal server error"]}), 500
-    
+
 @app.route('/test', methods=['GET'])
 def test():
     return jsonify({"message": "Test route is working"})
