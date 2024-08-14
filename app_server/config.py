@@ -8,7 +8,11 @@
 
 import logging
 import os
+from flask import Flask
+from flask_cors import CORS
 
+app = Flask(__name__)
+CORS(app)
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
 
@@ -17,7 +21,7 @@ class Config:
 
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'sqlite:///{db_path}'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'sqlite:///instance/app.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'your_jwt_secret_key'
     LOG_LEVEL = logging.DEBUG
